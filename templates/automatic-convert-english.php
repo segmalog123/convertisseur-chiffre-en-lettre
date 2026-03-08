@@ -64,7 +64,6 @@ if ($is_vip) {
 
         <!-- ═══ HERO: Main Result ═══════════════════════════════════ -->
         <div class="cel-result-hero">
-            <p class="cel-h1">How do you write <?php echo esc_html($number_to_convert); ?> in English?</p>
             <div class="cel-result-wrapper"
                 style="display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap;">
                 <p class="cel-main-result" id="celMainResultText" style="margin:0;">

@@ -132,13 +132,18 @@ class HeaderBlock
                 <div class="e3lan e3lan-below_header" style="font-size: 12px; line-height: 2em;padding: 0px 5px">
                     <?php
                     $number_to_convert = $wp_query->get('number_id');
+                    $cel_page_after    = $wp_query->get('cel_page');
                     if (isset($number_to_convert) && $number_to_convert !== '') {
                         ?>
                         <h1><?php echo esc_html(ConverterHelper::convert($number_to_convert, 'h1')); ?></h1>
                         <?php
+                    } elseif ($cel_page_after === 'convertisseur-anglais') {
+                        ?>
+                        <h1>Convertisseur Chiffre en Lettre Anglais</h1>
+                        <?php
                     } elseif (is_home() || is_front_page()) {
                         ?>
-                        <h1>Chiffre en Lettre - écrire les chiffres en lettres facilement</h1>
+                        <p style="font-size: 1.6em; font-weight: 700; line-height: 1.3; margin: 0; color: inherit;">Chiffre en Lettre - écrire les chiffres en lettres facilement</p>
                         <?php
                     } else {
                         ?>

@@ -3,7 +3,7 @@
  * Plugin Name:       Convertisseur Chiffre en Lettre
  * Plugin URI:        https://www.chiffreenlettre.com
  * Description:       Converts numbers to text in French and English. Generates virtual pages with full Yoast SEO integration for /ecrire/{n}-en-lettre/ and /comment-on-dit/{n}-en-anglais/ URLs.
- * Version:           0.0.1
+ * Version:           0.0.2
  * Author:            Chiffre en Lettre
  * Author URI:        https://www.chiffreenlettre.com
  * Text Domain:       convertisseur-chiffre-en-lettre

@@ -31,9 +31,6 @@ get_header();
 
         <!-- ═══ HERO: Intro ══════════════════════════════════════════ -->
         <div class="cel-result-hero">
-            <h1 class="cel-h1" style="font-size: clamp(20px, 4vw, 28px); font-weight: 700; margin-bottom: 12px;">
-                Convertisseur Chiffre en Lettre Anglais
-            </h1>
             <p style="font-size: 16px; line-height: 1.5; opacity: 0.95; margin: 0 auto; max-width: 600px;">
                 Convertissez instantanément n'importe quel chiffre en lettres anglaises.
                 Idéal pour chèques, contrats et apprentissage.
