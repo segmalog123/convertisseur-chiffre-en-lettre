@@ -238,10 +238,9 @@ if ($is_vip) {
                 </p>
             </div>
 
-            <!-- ═══ SIMILAR NUMBERS ══════════════════════════════════════ -->
+            <!-- ═══ SIMILAR NUMBERS / RELATED SEARCHES ══════════════════════════════════════ -->
             <div class="cel-section">
-                <h2 class="cel-section-title">Nombres similaires à <?php echo esc_html($number_to_convert); ?> à convertir
-                </h2>
+                <h2 class="cel-section-title">Recherches associées</h2>
                 <ul class="cel-pills">
                     <?php
                     $anchor_texts = [
@@ -263,6 +262,18 @@ if ($is_vip) {
                             </a>
                         </li>
                     <?php endforeach; ?>
+                    
+                    <?php 
+                    // Add factorial cross-link if X <= 10000
+                    $x_val = (int)$number_to_convert_php;
+                    if ($x_val >= 0 && $x_val <= 10000): 
+                    ?>
+                    <li>
+                        <a href="<?php echo esc_url(site_url('/factorielle-de-' . $x_val . '/')); ?>">
+                            Calcul de la factorielle de <?php echo $x_val; ?> (<?php echo $x_val; ?>!)
+                        </a>
+                    </li>
+                    <?php endif; ?>
                 </ul>
             </div>
 
