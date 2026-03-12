@@ -62,6 +62,34 @@ class SeoController
     }
 
     /**
+     * Check if current page is the Factorial Calculator landing page.
+     *
+     * @return bool
+     */
+    private function isFactorialPage()
+    {
+        global $wp_query;
+        return $wp_query->get('cel_page') === 'calculatrice-factorielle';
+    }
+
+    /**
+     * Get the current factorial_id from the query.
+     *
+     * @return string|false
+     */
+    private function getFactorialId()
+    {
+        global $wp_query;
+        if ($wp_query->get('cel_page') === 'factorielle-de-x') {
+            $x = $wp_query->get('factorial_id');
+            if ($x !== '' && is_numeric($x) && intval($x) <= 10000) {
+                return $x;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Filter the page title.
      *
      * @param string $title Original title.
@@ -71,6 +99,13 @@ class SeoController
     {
         if ($this->isEnglishLandingPage()) {
             return 'Convertisseur Chiffre en Lettre Anglais - Convertir Nombre en Lettres';
+        }
+        if ($this->isFactorialPage()) {
+            return 'Calculatrice Factorielle : Calcul et Formule de n! en Ligne';
+        }
+        $fact_x = $this->getFactorialId();
+        if ($fact_x !== false) {
+            return "Factorielle de {$fact_x} ({$fact_x}!) | Calcul, Résultat Exact et Formule";
         }
         $number = $this->getNumberId();
         if ($number !== false) {
@@ -90,6 +125,13 @@ class SeoController
         if ($this->isEnglishLandingPage()) {
             return 'Convertissez instantanément vos chiffres en lettres anglaises. Outil gratuit pour écrire les nombres en anglais, idéal pour les chèques, Excel et documents officiels.';
         }
+        if ($this->isFactorialPage()) {
+            return 'Utilisez notre calculatrice factorielle gratuite pour trouver le factoriel d\'un nombre instantanément. Découvrez la formule de n!, la factorielle de 0, et la formule de Stirling.';
+        }
+        $fact_x = $this->getFactorialId();
+        if ($fact_x !== false) {
+            return "Quelle est la factorielle de {$fact_x} ? Obtenez le résultat exact de {$fact_x}!, la décomposition du calcul, le nombre de zéros finaux et les permutations possibles.";
+        }
         $number = $this->getNumberId();
         if ($number !== false) {
             return ConverterHelper::convert($number, 'desc');
@@ -107,6 +149,10 @@ class SeoController
      */
     public function disableYoastCanonical($canonical)
     {
+        $fact_x = $this->getFactorialId();
+        if ($fact_x !== false) {
+            return false;
+        }
         $number = $this->getNumberId();
         if ($number !== false) {
             return false;
@@ -123,6 +169,16 @@ class SeoController
     {
         if ($this->isEnglishLandingPage()) {
             echo '<link rel="canonical" href="' . esc_url(home_url('/convertisseur-anglais/')) . '" />' . "\n";
+            return;
+        }
+        if ($this->isFactorialPage()) {
+            echo '<link rel="canonical" href="' . esc_url(home_url('/calculatrice-factorielle/')) . '" />' . "\n";
+            return;
+        }
+        $fact_x = $this->getFactorialId();
+        if ($fact_x !== false) {
+            $url = home_url("/factorielle-de-{$fact_x}/");
+            echo '<link rel="canonical" href="' . esc_url($url) . '" />' . "\n";
             return;
         }
         $number = $this->getNumberId();
@@ -200,8 +256,20 @@ class SeoController
      */
     public function filterRobots($robots)
     {
-        if ($this->isEnglishLandingPage()) {
+        if ($this->isEnglishLandingPage() || $this->isFactorialPage()) {
             return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+        }
+        $fact_x = $this->getFactorialId();
+        if ($fact_x !== false) {
+            $x = intval($fact_x);
+            // IF X <= 200 : index
+            // IF X > 200 AND X % 50 == 0 : index
+            // Else : noindex, follow
+            if ($x <= 200 || ($x > 200 && $x % 50 === 0)) {
+                return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+            } else {
+                return 'noindex, follow';
+            }
         }
         $number = $this->getNumberId();
         if ($number !== false) {

@@ -183,7 +183,9 @@ class ConverterHelper
      */
     public static function percent($number_to_convert)
     {
-        $num = self::listSimilarNumbers($number_to_convert)[8];
+        $similar = self::listSimilarNumbers($number_to_convert);
+        $num = isset($similar[8]) ? $similar[8] : (!empty($similar) ? end($similar) : $number_to_convert);
+        
         if ($num > 100) {
             return substr($num, 0, 2);
         }

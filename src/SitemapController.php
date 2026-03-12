@@ -20,6 +20,10 @@ class SitemapController
         add_action('init', [$this, 'registerSitemapActions']);
         add_filter('wpseo_sitemap_index', [$this, 'addEcrireSitemapIndex']);
         add_filter('wpseo_sitemap_index', [$this, 'addCommentOnDitSitemapIndex']);
+        
+        // New custom index filters
+        add_filter('wpseo_sitemap_index', [$this, 'addFactorialSitemapIndex']);
+        add_filter('wpseo_sitemap_index', [$this, 'addCalculatorsSitemapIndex']);
     }
 
     /**
@@ -32,6 +36,10 @@ class SitemapController
         if (isset($wpseo_sitemaps) && !empty($wpseo_sitemaps)) {
             $wpseo_sitemaps->register_sitemap('ecrirechiffre', [$this, 'createEcrireSitemap']);
             $wpseo_sitemaps->register_sitemap('commentonditchiffre', [$this, 'createCommentOnDitSitemap']);
+            
+            // New sitemaps
+            $wpseo_sitemaps->register_sitemap('factorielle', [$this, 'createFactorialSitemap']);
+            $wpseo_sitemaps->register_sitemap('calculateurs', [$this, 'createCalculatorsSitemap']);
         }
     }
 
@@ -42,6 +50,10 @@ class SitemapController
     {
         add_action('wp_seo_do_sitemap_our-ecrirechiffre', [$this, 'createEcrireSitemap']);
         add_action('wp_seo_do_sitemap_our-commentonditchiffre', [$this, 'createCommentOnDitSitemap']);
+        
+        // Actions for new sitemaps
+        add_action('wp_seo_do_sitemap_our-factorielle', [$this, 'createFactorialSitemap']);
+        add_action('wp_seo_do_sitemap_our-calculateurs', [$this, 'createCalculatorsSitemap']);
     }
 
     /**
@@ -118,6 +130,86 @@ class SitemapController
     {
         $items .= '    <sitemap>   
         <loc>' . site_url() . '/commentonditchiffre-sitemap.xml</loc>
+        <lastmod>' . date('c', time()) . '</lastmod>
+    </sitemap>
+';
+        return $items;
+    }
+
+    /**
+     * Create the Factorial sitemap.
+     */
+    public function createFactorialSitemap()
+    {
+        global $wpseo_sitemaps;
+        $output = '';
+
+        // Factorial VIPs (0 to 200, plus multiples of 50 up to 10000)
+        for ($i = 0; $i <= 10000; $i++) {
+            if ($i <= 200 || ($i > 200 && $i % 50 === 0)) {
+                $url = [];
+                $url['loc'] = site_url() . '/factorielle-de-' . $i . '/';
+                $url['mod'] = date('c', time());
+                $output .= $wpseo_sitemaps->renderer->sitemap_url($url);
+            }
+        }
+
+        $sitemap = '<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
+        $sitemap .= 'xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" ';
+        $sitemap .= 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $sitemap .= $output . '</urlset>';
+
+        $wpseo_sitemaps->set_sitemap($sitemap);
+    }
+
+    /**
+     * Create the Calculators landing pages sitemap.
+     */
+    public function createCalculatorsSitemap()
+    {
+        global $wpseo_sitemaps;
+        $output = '';
+
+        $pages = [
+            '/convertisseur-anglais/',
+            '/calculatrice-factorielle/'
+        ];
+
+        foreach ($pages as $path) {
+            $url = [];
+            $url['loc'] = site_url() . $path;
+            $url['mod'] = date('c', time());
+            $output .= $wpseo_sitemaps->renderer->sitemap_url($url);
+        }
+
+        $sitemap = '<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
+        $sitemap .= 'xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" ';
+        $sitemap .= 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $sitemap .= $output . '</urlset>';
+
+        $wpseo_sitemaps->set_sitemap($sitemap);
+    }
+
+    /**
+     * Add the factorial sitemap to the sitemap index.
+     */
+    public function addFactorialSitemapIndex($items)
+    {
+        $items .= '    <sitemap>   
+        <loc>' . site_url() . '/factorielle-sitemap.xml</loc>
+        <lastmod>' . date('c', time()) . '</lastmod>
+    </sitemap>
+';
+        return $items;
+    }
+
+    /**
+     * Add the calculators sitemap to the sitemap index.
+     */
+    public function addCalculatorsSitemapIndex($items)
+    {
+        $items .= '    <sitemap>   
+        <loc>' . site_url() . '/calculateurs-sitemap.xml</loc>
         <lastmod>' . date('c', time()) . '</lastmod>
     </sitemap>
 ';

@@ -31,8 +31,18 @@ class TemplateLoader
 
         $number_to_convert = $wp_query->get('number_id');
         $cel_page = $wp_query->get('cel_page');
+        $factorial_id_raw = $wp_query->get('factorial_id');
 
-        if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais') {
+        // Check explicit 404 conditions (out-of-range numbers)
+        if ($cel_page === 'factorielle-de-x' && $factorial_id_raw !== '') {
+            if (!is_numeric($factorial_id_raw) || intval($factorial_id_raw) < 0 || intval($factorial_id_raw) > 10000) {
+                $wp_query->set_404();
+                status_header(404);
+                return;
+            }
+        }
+
+        if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais' || $cel_page === 'calculatrice-factorielle' || $cel_page === 'factorielle-de-x') {
             $wp_query->is_404 = false;
             $wp_query->is_page = true;
             status_header(200);
@@ -55,6 +65,25 @@ class TemplateLoader
             $plugin_template = CEL_PLUGIN_DIR . 'templates/convertisseur-anglais.php';
             if (file_exists($plugin_template)) {
                 return $plugin_template;
+            }
+        }
+
+        // Factorial calculator landing page: /calculatrice-factorielle/
+        if ($cel_page === 'calculatrice-factorielle') {
+            $plugin_template = CEL_PLUGIN_DIR . 'templates/calculatrice-factorielle.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+
+        // Dynamic Factorial page: /factorielle-de-x/
+        if ($cel_page === 'factorielle-de-x') {
+            $x = $wp_query->get('factorial_id');
+            if ($x !== '' && is_numeric($x) && intval($x) <= 10000) {
+                $plugin_template = CEL_PLUGIN_DIR . 'templates/factorielle-de-x.php';
+                if (file_exists($plugin_template)) {
+                    return $plugin_template;
+                }
             }
         }
 

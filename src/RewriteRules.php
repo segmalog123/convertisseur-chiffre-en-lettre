@@ -51,6 +51,20 @@ class RewriteRules
             'index.php?cel_page=convertisseur-anglais',
             'top'
         );
+
+        // Factorial calculator landing page: /calculatrice-factorielle/
+        add_rewrite_rule(
+            'calculatrice-factorielle/?$',
+            'index.php?cel_page=calculatrice-factorielle',
+            'top'
+        );
+
+        // Dynamic factorial results page: /factorielle-de-X/
+        add_rewrite_rule(
+            'factorielle-de-([0-9]+)/?$',
+            'index.php?cel_page=factorielle-de-x&factorial_id=$matches[1]',
+            'top'
+        );
     }
 
     /**
@@ -63,6 +77,7 @@ class RewriteRules
     {
         $vars[] = 'number_id';
         $vars[] = 'cel_page'; // used for /convertisseur-anglais/
+        $vars[] = 'factorial_id';
         return $vars;
     }
 

@@ -41,7 +41,8 @@ $result_en_dollars = ucfirst(funcConvert($number_to_convert, 'convert', '1'));
 $result_fr_plain = ucfirst(enChiffre($number_to_convert)['final_number_lettre']);
 $similar = funcListNumber($number_to_convert);
 $percent_number = funcPercent($number_to_convert);
-$similar_8_fr = ucfirst(enChiffre($similar[8])['final_number_lettre']);
+$similar_8_val = isset($similar[8]) ? $similar[8] : (!empty($similar) ? end($similar) : $number_to_convert);
+$similar_8_fr = ucfirst(enChiffre($similar_8_val)['final_number_lettre']);
 $url_fr = esc_url(site_url('/ecrire/' . str_replace('.', ',', $number_to_convert) . '-en-lettre/'));
 
 $is_vip = \ChiffreEnLettre\NumberVipList::isVip($number_to_convert);

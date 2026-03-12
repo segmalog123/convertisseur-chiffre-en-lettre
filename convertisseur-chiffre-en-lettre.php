@@ -3,7 +3,7 @@
  * Plugin Name:       Convertisseur Chiffre en Lettre
  * Plugin URI:        https://www.chiffreenlettre.com
  * Description:       Converts numbers to text in French and English. Generates virtual pages with full Yoast SEO integration for /ecrire/{n}-en-lettre/ and /comment-on-dit/{n}-en-anglais/ URLs.
- * Version:           0.0.2
+ * Version:           0.0.3
  * Author:            Chiffre en Lettre
  * Author URI:        https://www.chiffreenlettre.com
  * Text Domain:       convertisseur-chiffre-en-lettre
@@ -99,9 +99,10 @@ register_deactivation_hook(__FILE__, 'cel_deactivate');
  */
 function cel_maybe_flush_rewrite_rules()
 {
-    if (get_option('cel_flush_rewrite_rules')) {
+    if (get_option('cel_flush_rewrite_rules') || !get_option('cel_flush_rewrite_rules_v4')) {
         flush_rewrite_rules();
         delete_option('cel_flush_rewrite_rules');
+        update_option('cel_flush_rewrite_rules_v4', true);
     }
 }
 add_action('init', 'cel_maybe_flush_rewrite_rules', 20);
@@ -114,10 +115,6 @@ function cel_init_plugin()
     // Initialize the core plugin (handles templates, hooks, assets)
     $plugin = new \ChiffreEnLettre\Plugin();
     $plugin->init();
-
-    // Initialize custom sitemaps
-    $plugin_sitemap = new \ChiffreEnLettre\SitemapController();
-    $plugin_sitemap->init();
 
     // Init Widgets
     add_action('widgets_init', function () {

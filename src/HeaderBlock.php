@@ -51,9 +51,17 @@ class HeaderBlock
         global $wp_query;
         $number_to_convert = $wp_query->get('number_id');
         $cel_page = $wp_query->get('cel_page');
-        if (empty($number_to_convert) && !is_front_page() && $cel_page !== 'convertisseur-anglais') {
+        $factorial_id = $wp_query->get('factorial_id');
+        
+        if (empty($number_to_convert) && !is_front_page() && !in_array($cel_page, ['convertisseur-anglais', 'calculatrice-factorielle', 'factorielle-de-x']) && empty($factorial_id)) {
             return;
         }
+
+        // Also skip for out-of-bounds factorial numbers (> 10000)
+        if (!empty($factorial_id) && ((int)$factorial_id > 10000 || (int)$factorial_id < 0)) {
+            return;
+        }
+
         $this->renderBeforeBlock();
         $this->renderAfterBlock();
     }
@@ -70,10 +78,21 @@ class HeaderBlock
             $number_to_convert = '';
         }
 
+        $cel_page = $wp_query->get('cel_page');
+        $factorial_id = $wp_query->get('factorial_id');
+        $is_factorial = !empty($factorial_id) || $factorial_id === '0';
+
+        // Suppress entirely for out-of-bounds pages — let the 404 render clean
+        if ($is_factorial && ((int)$factorial_id > 10000 || (int)$factorial_id < 0)) {
+            return;
+        }
+
         $current_url = home_url(add_query_arg([], $wp->request ?? ''));
         $convert_to = 'fr';
         if (strpos($current_url, '/comment-on-dit/') !== false) {
             $convert_to = 'en';
+        } elseif ($cel_page === 'calculatrice-factorielle' || $is_factorial) {
+            $convert_to = 'factorial';
         }
         ?>
         <div class="container cat-box-content before_html_custom_header_block">
@@ -86,7 +105,21 @@ class HeaderBlock
                 <p style="padding: 18px 25px 0px 25px;">
                     <span style="font-size: 16px; line-height: 2em;">
                         <?php
-                        if (strpos($current_url, '/comment-on-dit/') !== false) {
+                        if ($cel_page === 'calculatrice-factorielle' || $is_factorial) {
+                            if ($is_factorial) {
+                                // Spin arrays for factorials pre-title
+                                $array_a = [
+                                    "Solution mathématique complète pour la factorielle de {$factorial_id}",
+                                    "Calculateur de la valeur exacte de {$factorial_id}!",
+                                    "Obtenir le résultat et la formule de {$factorial_id} factorielle",
+                                    "Résolution étape par étape de {$factorial_id}!"
+                                ];
+                                $spin_index = ((int)$factorial_id * 7 + 13) % 4;
+                                echo esc_html($array_a[$spin_index]);
+                            } else {
+                                echo "Calculer la factorielle (n!) de n'importe quel nombre instantanément";
+                            }
+                        } elseif (strpos($current_url, '/comment-on-dit/') !== false) {
                             echo ConverterHelper::convert('', 'h2');
                         } else {
                             ?>
@@ -100,12 +133,17 @@ class HeaderBlock
                         ?>
                     </span>
                 </p>
+                <?php
+                $placeholder = ($cel_page === 'calculatrice-factorielle' || $is_factorial) ? 'Entrez un entier positif (ex: 5)' : 'Entrez le chiffre à convertir ici';
+                $btn_text = ($cel_page === 'calculatrice-factorielle' || $is_factorial) ? 'CALCULER' : 'CONVERTIR';
+                $search_val = $is_factorial ? $factorial_id : $number_to_convert;
+                ?>
                 <p class="convert-block">
                     <input min="0" step="any" class="convert-input" type="text" name="tolettre" required=""
-                        title="Entrez le chiffre à convertir ici" value="<?php echo esc_attr($number_to_convert); ?>"
-                        placeholder="Entrez le chiffre à convertir ici" autocomplete="off">
+                        title="<?php echo esc_attr($placeholder); ?>" value="<?php echo esc_attr($search_val); ?>"
+                        placeholder="<?php echo esc_attr($placeholder); ?>" autocomplete="off">
                     <button class="convert-button" data-convert="<?php echo esc_attr($convert_to); ?>" type="button"
-                        name="submitted"><i class="fa fa-refresh"></i> CONVERTIR</button>
+                        name="submitted"><i class="fa fa-refresh"></i> <?php echo esc_html($btn_text); ?></button>
                 </p>
                 <p style="text-align: center;text-align: center;color: red;padding: 5px;">
                     <span class="error-input"></span>
@@ -122,6 +160,12 @@ class HeaderBlock
     {
         global $wp_query;
 
+        // Suppress for out-of-bounds pages
+        $factorial_id_check = $wp_query->get('factorial_id');
+        if (!empty($factorial_id_check) && ((int)$factorial_id_check > 10000 || (int)$factorial_id_check < 0)) {
+            return;
+        }
+
         $number_to_convert = $wp_query->get('number_id');
         if (!isset($number_to_convert) || $number_to_convert === '') {
             $number_to_convert = '';
@@ -132,14 +176,36 @@ class HeaderBlock
                 <div class="e3lan e3lan-below_header" style="font-size: 12px; line-height: 2em;padding: 0px 5px">
                     <?php
                     $number_to_convert = $wp_query->get('number_id');
-                    $cel_page_after    = $wp_query->get('cel_page');
+                    $cel_page_after = $wp_query->get('cel_page');
+                    $factorial_id = $wp_query->get('factorial_id');
+                    $is_factorial = !empty($factorial_id) || $factorial_id === '0';
+
+                    if ($is_factorial && ((int)$factorial_id > 10000 || (int)$factorial_id < 0)) {
+                        return; // Out of bounds
+                    }
+
                     if (isset($number_to_convert) && $number_to_convert !== '') {
                         ?>
                         <h1><?php echo esc_html(ConverterHelper::convert($number_to_convert, 'h1')); ?></h1>
                         <?php
+                    } elseif ($is_factorial) {
+                        $array_b = [
+                            "Quelle est la Factorielle de {$factorial_id} ? ({$factorial_id}!)",
+                            "Le Calcul de la Factorielle {$factorial_id}",
+                            "Valeur exacte et propriétés de {$factorial_id} Factorielle",
+                            "{$factorial_id}! : Résultat et Décomposition Mathématique"
+                        ];
+                        $spin_index = ((int)$factorial_id * 7 + 13) % 4;
+                        ?>
+                        <h1><?php echo esc_html($array_b[$spin_index]); ?></h1>
+                        <?php
                     } elseif ($cel_page_after === 'convertisseur-anglais') {
                         ?>
                         <h1>Convertisseur Chiffre en Lettre Anglais</h1>
+                        <?php
+                    } elseif ($cel_page_after === 'calculatrice-factorielle') {
+                        ?>
+                        <h1>Calculatrice Factorielle : Calculer la Factorielle (n!)</h1>
                         <?php
                     } elseif (is_home() || is_front_page()) {
                         ?>
