@@ -30,6 +30,7 @@ $number_to_convert = $wp_query->get('number_id');
 if (!isset($number_to_convert) || $number_to_convert === '') {
     $number_to_convert = '';
 }
+$number_to_convert_php = (float) str_replace(['.', ','], ['', '.'], $number_to_convert);
 
 // Pre-compute all conversions once
 $result_plain = ucfirst(funcConvert($number_to_convert, 'convert'));
@@ -274,6 +275,12 @@ if ($is_vip) {
                         </a>
                     </li>
                     <?php endif; ?>
+                    
+                    <li>
+                        <a href="<?php echo esc_url(site_url('/comment-on-dit/' . $number_to_convert_php . '-en-anglais/')); ?>">
+                            Traduire le nombre <?php echo esc_html($number_to_convert_php); ?> en anglais
+                        </a>
+                    </li>
                 </ul>
             </div>
 

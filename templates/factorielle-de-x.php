@@ -478,8 +478,8 @@ get_header();
             </p>
         <?php endif; ?>
 
-        <!-- ══ NEARBY ══════════════════════════════════════════════════ -->
-        <h2 class="nwf-h2">🔄 Calculer les Factorielles Proches</h2>
+        <!-- ══ RELATED SEARCHES ══════════════════════════════════════════ -->
+        <h2 class="nwf-h2">🌐 Recherches associées</h2>
         <ul class="nwf-pills">
             <?php foreach ($nearby_links as $link): ?>
                 <li>
@@ -488,11 +488,6 @@ get_header();
                     </a>
                 </li>
             <?php endforeach; ?>
-        </ul>
-
-        <!-- ══ OTHER CONVERSIONS ════════════════════════════════════════ -->
-        <h2 class="nwf-h2">🌐 Autres Conversions Utiles</h2>
-        <ul class="nwf-pills">
             <li>
                 <a href="<?php echo esc_url(home_url('/ecrire/' . $x . '-en-lettre/')); ?>">
                     Écrire le nombre <?php echo $x; ?> en lettres (Orthographe)
