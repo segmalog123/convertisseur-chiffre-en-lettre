@@ -226,17 +226,17 @@ if ($is_vip) {
                             </a>
                         </li>
                     <?php endforeach; ?>
-                    
-                    <?php 
+
+                    <?php
                     // Add factorial cross-link if X <= 10000
-                    $x_val = (int)$number_to_convert_php;
-                    if ($x_val >= 0 && $x_val <= 10000): 
-                    ?>
-                    <li>
-                        <a href="<?php echo esc_url(site_url('/factorielle-de-' . $x_val . '/')); ?>">
-                            Valeur mathématique de la factorielle de <?php echo $x_val; ?>
-                        </a>
-                    </li>
+                    $x_val = (int) $number_to_convert_php;
+                    if ($x_val >= 0 && $x_val <= 10000):
+                        ?>
+                        <li>
+                            <a href="<?php echo esc_url(site_url('/factorielle-de-' . $x_val . '/')); ?>">
+                                factorielle de <?php echo $x_val; ?>
+                            </a>
+                        </li>
                     <?php endif; ?>
                 </ul>
             </div>

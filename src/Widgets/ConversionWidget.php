@@ -46,8 +46,12 @@ class ConversionWidget extends WP_Widget
         $title_english = !empty($instance['title_english']) ? $instance['title_english'] : 'Nombres similaires en anglais';
         $english_numbers_str = !empty($instance['english_numbers']) ? $instance['english_numbers'] : '';
 
-        // Do not display if neither is checked
-        if (!$show_french && !$show_english) {
+        $show_factorial = !empty($instance['show_factorial']) ? $instance['show_factorial'] : false;
+        $title_factorial = !empty($instance['title_factorial']) ? $instance['title_factorial'] : 'Calculer les Factorielles Proches';
+        $factorial_numbers_str = !empty($instance['factorial_numbers']) ? $instance['factorial_numbers'] : '';
+
+        // Do not display if none are checked
+        if (!$show_french && !$show_english && !$show_factorial) {
             return;
         }
 
@@ -160,6 +164,44 @@ class ConversionWidget extends WP_Widget
             echo '</div>';
         }
 
+        // -- FACTORIAL SECTION --
+        if ($show_factorial) {
+            $anchor_texts_fac = [
+                'Factorielle de %s',
+                'Factorielle %s',
+                '%s factorielle',
+                '%s!',
+                'Calcul factorielle %s'
+            ];
+
+            echo '<div class="cel-widget-section">';
+            echo '<h4 class="cel-widget-title">' . esc_html($title_factorial) . '</h4>';
+            echo '<ul class="cel-widget-pills">';
+
+            $similar_numbers_fac = [];
+            if (!empty($factorial_numbers_str)) {
+                $custom_fac = array_filter(array_map('trim', explode(',', $factorial_numbers_str)));
+                if (!empty($custom_fac)) {
+                    shuffle($custom_fac);
+                    $similar_numbers_fac = array_slice($custom_fac, 0, 5);
+                }
+            }
+            if (empty($similar_numbers_fac)) {
+                $similar_numbers_fac = array_slice(NumberVipList::getSmartRelated((int) $cleaned_number), 0, 5);
+            }
+
+            foreach ($similar_numbers_fac as $index => $n) {
+                // Limit factorial to 10000 to avoid 404s
+                if ((int)$n >= 0 && (int)$n <= 10000) {
+                    $anchor_phrase = sprintf($anchor_texts_fac[$index % count($anchor_texts_fac)], $n);
+                    $url = esc_url(site_url('/factorielle-de-' . $n . '/'));
+                    echo '<li><a href="' . $url . '">' . esc_html($anchor_phrase) . '</a></li>';
+                }
+            }
+            echo '</ul>';
+            echo '</div>';
+        }
+
         echo $args['after_widget'];
     }
 
@@ -177,6 +219,10 @@ class ConversionWidget extends WP_Widget
         $show_english = isset($instance['show_english']) ? (bool) $instance['show_english'] : true;
         $title_english = !empty($instance['title_english']) ? $instance['title_english'] : 'Nombres similaires en anglais';
         $english_numbers = !empty($instance['english_numbers']) ? $instance['english_numbers'] : '';
+
+        $show_factorial = isset($instance['show_factorial']) ? (bool) $instance['show_factorial'] : true;
+        $title_factorial = !empty($instance['title_factorial']) ? $instance['title_factorial'] : 'Calculer les Factorielles Proches';
+        $factorial_numbers = !empty($instance['factorial_numbers']) ? $instance['factorial_numbers'] : '';
         ?>
 
         <p><strong>Section Française</strong></p>
@@ -223,6 +269,29 @@ class ConversionWidget extends WP_Widget
             <small>Laissez vide pour générer automatiquement les nombres.</small>
         </p>
 
+        <hr style="margin:15px 0;">
+
+        <p><strong>Section Factorielle</strong></p>
+        <p>
+            <input class="checkbox" type="checkbox" <?php checked($show_factorial); ?>
+                id="<?php echo esc_attr($this->get_field_id('show_factorial')); ?>"
+                name="<?php echo esc_attr($this->get_field_name('show_factorial')); ?>" />
+            <label for="<?php echo esc_attr($this->get_field_id('show_factorial')); ?>">Afficher les liens factoriels</label>
+        </p>
+        <p>
+            <label for="<?php echo esc_attr($this->get_field_id('title_factorial')); ?>">Titre (Factorielle) :</label>
+            <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title_factorial')); ?>"
+                name="<?php echo esc_attr($this->get_field_name('title_factorial')); ?>" type="text"
+                value="<?php echo esc_attr($title_factorial); ?>">
+        </p>
+        <p>
+            <label for="<?php echo esc_attr($this->get_field_id('factorial_numbers')); ?>">Nombres Factoriels (séparés par des
+                virgules) :</label>
+            <textarea class="widefat" rows="3" id="<?php echo esc_attr($this->get_field_id('factorial_numbers')); ?>"
+                name="<?php echo esc_attr($this->get_field_name('factorial_numbers')); ?>"><?php echo esc_textarea($factorial_numbers); ?></textarea>
+            <small>Laissez vide pour générer automatiquement les nombres. Nb > 10000 sont ignorés.</small>
+        </p>
+
         <p><em>Le widget affichera automatiquement 5 liens VIP générés dynamiquement pour chaque langue cochée.</em></p>
         <?php
     }
@@ -244,6 +313,10 @@ class ConversionWidget extends WP_Widget
         $instance['show_english'] = !empty($new_instance['show_english']) ? 1 : 0;
         $instance['title_english'] = (!empty($new_instance['title_english'])) ? sanitize_text_field($new_instance['title_english']) : '';
         $instance['english_numbers'] = (!empty($new_instance['english_numbers'])) ? sanitize_textarea_field($new_instance['english_numbers']) : '';
+
+        $instance['show_factorial'] = !empty($new_instance['show_factorial']) ? 1 : 0;
+        $instance['title_factorial'] = (!empty($new_instance['title_factorial'])) ? sanitize_text_field($new_instance['title_factorial']) : '';
+        $instance['factorial_numbers'] = (!empty($new_instance['factorial_numbers'])) ? sanitize_textarea_field($new_instance['factorial_numbers']) : '';
 
         return $instance;
     }

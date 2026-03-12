@@ -490,12 +490,12 @@ get_header();
             <?php endforeach; ?>
             <li>
                 <a href="<?php echo esc_url(home_url('/ecrire/' . $x . '-en-lettre/')); ?>">
-                    Écrire le nombre <?php echo $x; ?> en lettres (Orthographe)
+                    <?php echo $x; ?> en lettres
                 </a>
             </li>
             <li>
                 <a href="<?php echo esc_url(home_url('/comment-on-dit/' . $x . '-en-anglais/')); ?>">
-                    Traduction de <?php echo $x; ?> en Anglais
+                    <?php echo $x; ?> en Anglais
                 </a>
             </li>
         </ul>
