@@ -172,7 +172,8 @@ class SitemapController
 
         $pages = [
             '/convertisseur-anglais/',
-            '/calculatrice-factorielle/'
+            '/calculatrice-factorielle/',
+            '/calculatrice-diviseurs-pgcd-en-ligne/'
         ];
 
         foreach ($pages as $path) {

@@ -53,7 +53,7 @@ class HeaderBlock
         $cel_page = $wp_query->get('cel_page');
         $factorial_id = $wp_query->get('factorial_id');
         
-        if (empty($number_to_convert) && !is_front_page() && !in_array($cel_page, ['convertisseur-anglais', 'calculatrice-factorielle', 'factorielle-de-x']) && empty($factorial_id)) {
+        if (empty($number_to_convert) && !is_front_page() && !in_array($cel_page, ['convertisseur-anglais', 'calculatrice-factorielle', 'factorielle-de-x', 'calculatrice-diviseurs-pgcd']) && empty($factorial_id)) {
             return;
         }
 
@@ -93,6 +93,8 @@ class HeaderBlock
             $convert_to = 'en';
         } elseif ($cel_page === 'calculatrice-factorielle' || $is_factorial) {
             $convert_to = 'factorial';
+        } elseif ($cel_page === 'calculatrice-diviseurs-pgcd') {
+            $convert_to = 'divisors';
         }
         ?>
         <div class="container cat-box-content before_html_custom_header_block">
@@ -119,6 +121,8 @@ class HeaderBlock
                             } else {
                                 echo "Calculer la factorielle (n!) de n'importe quel nombre instantanément";
                             }
+                        } elseif ($cel_page === 'calculatrice-diviseurs-pgcd') {
+                            echo "Calculer les diviseurs ou le PGCD instantanément";
                         } elseif (strpos($current_url, '/comment-on-dit/') !== false) {
                             echo ConverterHelper::convert('', 'h2');
                         } else {
@@ -134,8 +138,17 @@ class HeaderBlock
                     </span>
                 </p>
                 <?php
-                $placeholder = ($cel_page === 'calculatrice-factorielle' || $is_factorial) ? 'Entrez un entier positif (ex: 5)' : 'Entrez le chiffre à convertir ici';
-                $btn_text = ($cel_page === 'calculatrice-factorielle' || $is_factorial) ? 'CALCULER' : 'CONVERTIR';
+                if ($cel_page === 'calculatrice-diviseurs-pgcd') {
+                    $placeholder = 'Entrez un nombre (ex: 24) ou deux nombres (ex: 24, 42)';
+                    $btn_text = 'CALCULER';
+                } elseif ($cel_page === 'calculatrice-factorielle' || $is_factorial) {
+                    $placeholder = 'Entrez un entier positif (ex: 5)';
+                    $btn_text = 'CALCULER';
+                } else {
+                    $placeholder = 'Entrez le chiffre à convertir ici';
+                    $btn_text = 'CONVERTIR';
+                }
+                
                 $search_val = $is_factorial ? $factorial_id : $number_to_convert;
                 ?>
                 <p class="convert-block">
@@ -206,6 +219,10 @@ class HeaderBlock
                     } elseif ($cel_page_after === 'calculatrice-factorielle') {
                         ?>
                         <h1>Calculatrice Factorielle : Calculer la Factorielle (n!)</h1>
+                        <?php
+                    } elseif ($cel_page_after === 'calculatrice-diviseurs-pgcd') {
+                        ?>
+                        <h1>Calculateur de Diviseurs et PGCD en Ligne</h1>
                         <?php
                     } elseif (is_home() || is_front_page()) {
                         ?>

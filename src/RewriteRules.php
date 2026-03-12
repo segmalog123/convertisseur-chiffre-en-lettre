@@ -59,6 +59,13 @@ class RewriteRules
             'top'
         );
 
+        // Divisors & PGCD calculator landing page: /calculatrice-diviseurs-pgcd-en-ligne/
+        add_rewrite_rule(
+            'calculatrice-diviseurs-pgcd-en-ligne/?$',
+            'index.php?cel_page=calculatrice-diviseurs-pgcd',
+            'top'
+        );
+
         // Dynamic factorial results page: /factorielle-de-X/
         add_rewrite_rule(
             'factorielle-de-([0-9]+)/?$',

@@ -73,6 +73,17 @@ class SeoController
     }
 
     /**
+     * Check if current page is the Divisors PGCD Calculator landing page.
+     *
+     * @return bool
+     */
+    private function isDivisorsPgcdPage()
+    {
+        global $wp_query;
+        return $wp_query->get('cel_page') === 'calculatrice-diviseurs-pgcd';
+    }
+
+    /**
      * Get the current factorial_id from the query.
      *
      * @return string|false
@@ -103,6 +114,9 @@ class SeoController
         if ($this->isFactorialPage()) {
             return 'Calculatrice Factorielle : Calcul et Formule de n! en Ligne';
         }
+        if ($this->isDivisorsPgcdPage()) {
+            return 'Calculateur de Diviseurs et PGCD en Ligne | Trouver les Diviseurs';
+        }
         $fact_x = $this->getFactorialId();
         if ($fact_x !== false) {
             return "Factorielle de {$fact_x} ({$fact_x}!) | Calcul, Résultat Exact et Formule";
@@ -127,6 +141,9 @@ class SeoController
         }
         if ($this->isFactorialPage()) {
             return 'Utilisez notre calculatrice factorielle gratuite pour trouver le factoriel d\'un nombre instantanément. Découvrez la formule de n!, la factorielle de 0, et la formule de Stirling.';
+        }
+        if ($this->isDivisorsPgcdPage()) {
+            return 'Utilisez notre calculatrice en ligne pour trouver instantanément tous les diviseurs d\'un entier naturel, les diviseurs communs, et calculer le PGCD.';
         }
         $fact_x = $this->getFactorialId();
         if ($fact_x !== false) {
@@ -173,6 +190,10 @@ class SeoController
         }
         if ($this->isFactorialPage()) {
             echo '<link rel="canonical" href="' . esc_url(home_url('/calculatrice-factorielle/')) . '" />' . "\n";
+            return;
+        }
+        if ($this->isDivisorsPgcdPage()) {
+            echo '<link rel="canonical" href="' . esc_url(home_url('/calculatrice-diviseurs-pgcd-en-ligne/')) . '" />' . "\n";
             return;
         }
         $fact_x = $this->getFactorialId();
@@ -256,7 +277,7 @@ class SeoController
      */
     public function filterRobots($robots)
     {
-        if ($this->isEnglishLandingPage() || $this->isFactorialPage()) {
+        if ($this->isEnglishLandingPage() || $this->isFactorialPage() || $this->isDivisorsPgcdPage()) {
             return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
         }
         $fact_x = $this->getFactorialId();

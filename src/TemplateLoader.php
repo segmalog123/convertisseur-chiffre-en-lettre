@@ -42,7 +42,7 @@ class TemplateLoader
             }
         }
 
-        if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais' || $cel_page === 'calculatrice-factorielle' || $cel_page === 'factorielle-de-x') {
+        if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais' || $cel_page === 'calculatrice-factorielle' || $cel_page === 'calculatrice-diviseurs-pgcd' || $cel_page === 'factorielle-de-x') {
             $wp_query->is_404 = false;
             $wp_query->is_page = true;
             status_header(200);
@@ -71,6 +71,14 @@ class TemplateLoader
         // Factorial calculator landing page: /calculatrice-factorielle/
         if ($cel_page === 'calculatrice-factorielle') {
             $plugin_template = CEL_PLUGIN_DIR . 'templates/calculatrice-factorielle.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+
+        // Divisors & PGCD calculator landing page: /calculatrice-diviseurs-pgcd-en-ligne/
+        if ($cel_page === 'calculatrice-diviseurs-pgcd') {
+            $plugin_template = CEL_PLUGIN_DIR . 'templates/calculatrice-diviseurs-pgcd.php';
             if (file_exists($plugin_template)) {
                 return $plugin_template;
             }
