@@ -257,6 +257,7 @@ get_header();
             if (!val) {
                 if (err) err.textContent = 'Veuillez entrer un nombre ou deux nombres séparés par une virgule.';
                 return;
+            }
             // split by comma or spaces
             var parts = val.split(/[,\s]+/).map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
 
