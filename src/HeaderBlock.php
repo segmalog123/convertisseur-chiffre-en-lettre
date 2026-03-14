@@ -93,6 +93,12 @@ class HeaderBlock
             return;
         }
 
+        // Suppress for out-of-bounds diviseur pages (> 1000000 or < 1)
+        $diviseur_id = $wp_query->get('diviseur_id');
+        if ($diviseur_id !== '' && ((int)$diviseur_id > 1000000 || (int)$diviseur_id < 1)) {
+            return;
+        }
+
         $current_url = home_url(add_query_arg([], $wp->request ?? ''));
         $convert_to = 'fr';
         if (strpos($current_url, '/comment-on-dit/') !== false) {
@@ -192,6 +198,12 @@ class HeaderBlock
         // Suppress for out-of-bounds pages
         $factorial_id_check = $wp_query->get('factorial_id');
         if (!empty($factorial_id_check) && ((int)$factorial_id_check > 10000 || (int)$factorial_id_check < 0)) {
+            return;
+        }
+
+        // Suppress for out-of-bounds diviseur pages (> 1000000 or < 1)
+        $diviseur_id_check = $wp_query->get('diviseur_id');
+        if ($diviseur_id_check !== '' && ((int)$diviseur_id_check > 1000000 || (int)$diviseur_id_check < 1)) {
             return;
         }
 

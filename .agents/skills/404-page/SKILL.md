@@ -7,41 +7,55 @@ description: How to ensure clean 404 pages for calculator result pages (e.g. /fa
 
 ## What a Clean 404 Looks Like
 
-The target 404 page shows only:
-- WordPress header (logo, nav)
-- The theme's standard 404 content: big "404 :(" graphic, "NOT FOUND", search bar, Voir aussi posts
+- WordPress header (logo, nav) — **WITHOUT** the HeaderBlock (pre-title + search form + H1)
+- Theme's standard 404 content: big "404 :(" graphic, "NOT FOUND", search bar, Voir aussi posts
 - WordPress footer
 
-**What must NOT appear on a 404:** the HeaderBlock (pre-title + search form + H1 spin). If it appears, it means WordPress still thinks the page is valid (200 OK) when the header renders.
+---
+
+## Root Cause: Why the Header Block Appears on 404 Pages
+
+The Sahifa theme uses **custom action hooks** (`before_custom_header_block` / `after_custom_header_block`) that call `renderBeforeBlock()` and `renderAfterBlock()` **directly**. These fire inside `get_header()`.
+
+When the template file calls `include(get_query_template('404'))`, the theme's 404 template calls `get_header()`, which fires those Sahifa hooks → `renderBeforeBlock()` and `renderAfterBlock()` execute → the pre-title, search form, and H1 spin render ABOVE the 404 content.
+
+> ⚠️ The guard must be in **BOTH** `renderBeforeBlock()` AND `renderAfterBlock()`, not just `maybeRenderBlocks()`. The Sahifa hooks bypass `maybeRenderBlocks()` entirely.
 
 ---
 
-## Root Cause of the "Header Appears on 404" Bug
+## The Fix — 4 Places to Update
 
-The HeaderBlock renders via a WordPress action hook that fires **before** the template file is loaded. If WordPress thinks the page is valid (200 OK) at hook time, HeaderBlock renders — even if the template later calls `set_404()` and `include(get_query_template('404'))`.
+### Place 1 ⭐ `src/HeaderBlock.php` → `renderBeforeBlock()`: Add out-of-bounds guard
 
-This is why **the 404 must be declared in `fix404Flags()`**, not in the template file.
-
----
-
-## The Fix — 3 Places to Update
-
-### Place 1 — `src/HeaderBlock.php` `maybeRenderBlocks()`: Add out-of-bounds guard ⭐ MOST IMPORTANT
-
-This is the **real cause** of the header appearing on 404 pages. HeaderBlock renders via a WordPress action hook fired **before** the template — even before `fix404Flags()` fully takes effect. The existing factorielle pattern (lines 60-63) must be mirrored for every new calculator:
+THIS IS THE MOST IMPORTANT. Add after the factorial guard (which uses the same pattern):
 
 ```php
-// In maybeRenderBlocks(), after the factorial guard:
-$mon_calcul_id = $wp_query->get('mon_calcul_id');
-if ($mon_calcul_id !== '' && ((int)$mon_calcul_id > MAX_LIMIT || (int)$mon_calcul_id < 1)) {
-    return; // ← stops HeaderBlock from rendering
+// Suppress for out-of-bounds diviseur pages (> 1000000 or < 1)
+$diviseur_id = $wp_query->get('mon_calcul_id');
+if ($diviseur_id !== '' && ((int)$diviseur_id > MAX_LIMIT || (int)$diviseur_id < 1)) {
+    return;
 }
 ```
 
-### Place 2 — `src/TemplateLoader.php` `fix404Flags()`: Declare 404 for out-of-range
+### Place 2 ⭐ `src/HeaderBlock.php` → `renderAfterBlock()`: Same guard
 
-Add before the 200-OK block:
+Add the **exact same guard** in `renderAfterBlock()` after its factorial guard:
 
+```php
+// Suppress for out-of-bounds diviseur pages (> 1000000 or < 1)
+$diviseur_id_check = $wp_query->get('mon_calcul_id');
+if ($diviseur_id_check !== '' && ((int)$diviseur_id_check > MAX_LIMIT || (int)$diviseur_id_check < 1)) {
+    return;
+}
+```
+
+### Place 3 — `src/HeaderBlock.php` → `maybeRenderBlocks()`: Same guard
+
+For non-Sahifa themes that use `wp_body_open`, add the same guard after the factorial check.
+
+### Place 4 — `src/TemplateLoader.php` → `fix404Flags()` + `loadTemplate()`
+
+**`fix404Flags()`** — Add before the 200-OK block:
 ```php
 $mon_calcul_id_raw = $wp_query->get('mon_calcul_id');
 if ($cel_page === 'mon-calcul-de-x' && $mon_calcul_id_raw !== '') {
@@ -53,8 +67,7 @@ if ($cel_page === 'mon-calcul-de-x' && $mon_calcul_id_raw !== '') {
 }
 ```
 
-### Place 3 — `src/TemplateLoader.php` `loadTemplate()`: Range-guard the template
-
+**`loadTemplate()`** — Range-guard the template:
 ```php
 if ($cel_page === 'mon-calcul-de-x') {
     $x = $wp_query->get('mon_calcul_id');
@@ -64,31 +77,32 @@ if ($cel_page === 'mon-calcul-de-x') {
             return $plugin_template;
         }
     }
-    // Out of range → falls through → WordPress serves clean 404
 }
 ```
 
 ---
 
-## You Can Remove 404 Logic from the Template File
+## Template Safety Net (Optional but Recommended)
 
-Once `fix404Flags()` and `loadTemplate()` handle the 404 correctly, the PHP block at the top of the template that calls `set_404()` / `include(404)` becomes redundant (though harmless to keep as a safety net).
+Keep the 404 check at the top of the template file as a second guard:
 
-The factorielle template also has this safety net:
 ```php
-if ($x > 10000) {
-    $wp_query->set_404(); status_header(404); nocache_headers();
-    include(get_query_template('404')); exit;
+if ($x > MAX_LIMIT) {
+    $wp_query->set_404();
+    status_header(404);
+    nocache_headers();
+    include(get_query_template('404'));
+    exit;
 }
 ```
 
-**Keep it** as a second guard, but know that the real fix is in TemplateLoader.
+This fires BEFORE `get_header()` in the template, but after the Sahifa hooks have already fired via the initial page load. The HeaderBlock guards (Places 1-3) are what actually prevent the header from appearing.
 
 ---
 
 ## Reference: Existing MAX_LIMIT Values
 
-| Calculator | MAX_LIMIT | `fix404Flags()` condition |
+| Calculator | MAX_LIMIT | Query var |
 |---|---|---|
-| `/factorielle-de-X/` | 10 000 | `intval($x) < 0 \|\| intval($x) > 10000` |
-| `/diviseurs-de-X/` | 1 000 000 | `intval($x) < 1 \|\| intval($x) > 1000000` |
+| `/factorielle-de-X/` | 10 000 | `factorial_id` |
+| `/diviseurs-de-X/` | 1 000 000 | `diviseur_id` |
