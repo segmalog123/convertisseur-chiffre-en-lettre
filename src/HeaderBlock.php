@@ -62,6 +62,12 @@ class HeaderBlock
             return;
         }
 
+        // Also skip for out-of-bounds diviseur numbers (> 1000000 or < 1)
+        $diviseur_id = $wp_query->get('diviseur_id');
+        if ($diviseur_id !== '' && ((int)$diviseur_id > 1000000 || (int)$diviseur_id < 1)) {
+            return;
+        }
+
         $this->renderBeforeBlock();
         $this->renderAfterBlock();
     }

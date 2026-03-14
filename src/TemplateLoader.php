@@ -42,6 +42,16 @@ class TemplateLoader
             }
         }
 
+        // Diviseurs out-of-range → 404 (must fire before the 200-OK block below)
+        $diviseur_id_raw = $wp_query->get('diviseur_id');
+        if ($cel_page === 'diviseurs-de-x' && $diviseur_id_raw !== '') {
+            if (!is_numeric($diviseur_id_raw) || intval($diviseur_id_raw) < 1 || intval($diviseur_id_raw) > 1000000) {
+                $wp_query->set_404();
+                status_header(404);
+                return;
+            }
+        }
+
         if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais' || $cel_page === 'calculatrice-factorielle' || $cel_page === 'calculatrice-diviseurs-pgcd' || $cel_page === 'factorielle-de-x' || $cel_page === 'diviseurs-de-x') {
             $wp_query->is_404 = false;
             $wp_query->is_page = true;
@@ -97,9 +107,12 @@ class TemplateLoader
 
         // Dynamic Divisors page: /diviseurs-de-X/
         if ($cel_page === 'diviseurs-de-x') {
-            $plugin_template = CEL_PLUGIN_DIR . 'templates/diviseurs-de-x.php';
-            if (file_exists($plugin_template)) {
-                return $plugin_template;
+            $x = $wp_query->get('diviseur_id');
+            if ($x !== '' && is_numeric($x) && intval($x) >= 1 && intval($x) <= 1000000) {
+                $plugin_template = CEL_PLUGIN_DIR . 'templates/diviseurs-de-x.php';
+                if (file_exists($plugin_template)) {
+                    return $plugin_template;
+                }
             }
         }
 
