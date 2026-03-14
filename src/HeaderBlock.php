@@ -53,7 +53,7 @@ class HeaderBlock
         $cel_page = $wp_query->get('cel_page');
         $factorial_id = $wp_query->get('factorial_id');
         
-        if (empty($number_to_convert) && !is_front_page() && !in_array($cel_page, ['convertisseur-anglais', 'calculatrice-factorielle', 'factorielle-de-x', 'calculatrice-diviseurs-pgcd']) && empty($factorial_id)) {
+        if (empty($number_to_convert) && !is_front_page() && !in_array($cel_page, ['convertisseur-anglais', 'calculatrice-factorielle', 'factorielle-de-x', 'calculatrice-diviseurs-pgcd', 'diviseurs-de-x']) && empty($factorial_id)) {
             return;
         }
 
@@ -93,7 +93,7 @@ class HeaderBlock
             $convert_to = 'en';
         } elseif ($cel_page === 'calculatrice-factorielle' || $is_factorial) {
             $convert_to = 'factorial';
-        } elseif ($cel_page === 'calculatrice-diviseurs-pgcd') {
+        } elseif ($cel_page === 'calculatrice-diviseurs-pgcd' || $cel_page === 'diviseurs-de-x') {
             $convert_to = 'divisors';
         }
         ?>
@@ -123,6 +123,15 @@ class HeaderBlock
                             }
                         } elseif ($cel_page === 'calculatrice-diviseurs-pgcd') {
                             echo "Calculer les diviseurs ou le PGCD instantanément";
+                        } elseif ($cel_page === 'diviseurs-de-x') {
+                            $div_id_spin = $wp_query->get('diviseur_id');
+                            $array_a_div = [
+                                "Solution mathématique : diviseurs d'un entier",
+                                "Calculateur des diviseurs de l'entier naturel {$div_id_spin}",
+                                "Trouver tous les diviseurs de {$div_id_spin}",
+                                "Propriétés et liste des diviseurs de {$div_id_spin}",
+                            ];
+                            echo esc_html($array_a_div[((int)$div_id_spin * 7 + 13) % 4]);
                         } elseif (strpos($current_url, '/comment-on-dit/') !== false) {
                             echo ConverterHelper::convert('', 'h2');
                         } else {
@@ -138,7 +147,7 @@ class HeaderBlock
                     </span>
                 </p>
                 <?php
-                if ($cel_page === 'calculatrice-diviseurs-pgcd') {
+                if ($cel_page === 'calculatrice-diviseurs-pgcd' || $cel_page === 'diviseurs-de-x') {
                     $placeholder = 'Entrez un nombre (ex: 24) ou deux nombres (ex: 24, 42)';
                     $btn_text = 'CALCULER';
                 } elseif ($cel_page === 'calculatrice-factorielle' || $is_factorial) {
@@ -149,7 +158,8 @@ class HeaderBlock
                     $btn_text = 'CONVERTIR';
                 }
                 
-                $search_val = $is_factorial ? $factorial_id : $number_to_convert;
+                $div_id_val = ($cel_page === 'diviseurs-de-x') ? $wp_query->get('diviseur_id') : '';
+                $search_val = $is_factorial ? $factorial_id : ($div_id_val !== '' ? $div_id_val : $number_to_convert);
                 ?>
                 <p class="convert-block">
                     <input min="0" step="any" class="convert-input" type="text" name="tolettre" required=""
@@ -223,6 +233,18 @@ class HeaderBlock
                     } elseif ($cel_page_after === 'calculatrice-diviseurs-pgcd') {
                         ?>
                         <h1>Calculateur de Diviseurs et PGCD en Ligne</h1>
+                        <?php
+                    } elseif ($cel_page_after === 'diviseurs-de-x') {
+                        $div_id = $wp_query->get('diviseur_id');
+                        $array_b_div = [
+                            "Quels sont tous les diviseurs de {$div_id} ?",
+                            "La liste complète des diviseurs de {$div_id}",
+                            "Les diviseurs de l'entier {$div_id} (Pairs, Impairs, Premiers)",
+                            "Comment trouver les diviseurs de {$div_id} ?",
+                        ];
+                        $spin_div = ((int)$div_id * 7 + 13) % 4;
+                        ?>
+                        <h1><?php echo esc_html($array_b_div[$spin_div]); ?></h1>
                         <?php
                     } elseif (is_home() || is_front_page()) {
                         ?>

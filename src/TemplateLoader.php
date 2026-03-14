@@ -42,7 +42,7 @@ class TemplateLoader
             }
         }
 
-        if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais' || $cel_page === 'calculatrice-factorielle' || $cel_page === 'calculatrice-diviseurs-pgcd' || $cel_page === 'factorielle-de-x') {
+        if (!empty($number_to_convert) || $cel_page === 'convertisseur-anglais' || $cel_page === 'calculatrice-factorielle' || $cel_page === 'calculatrice-diviseurs-pgcd' || $cel_page === 'factorielle-de-x' || $cel_page === 'diviseurs-de-x') {
             $wp_query->is_404 = false;
             $wp_query->is_page = true;
             status_header(200);
@@ -92,6 +92,14 @@ class TemplateLoader
                 if (file_exists($plugin_template)) {
                     return $plugin_template;
                 }
+            }
+        }
+
+        // Dynamic Divisors page: /diviseurs-de-X/
+        if ($cel_page === 'diviseurs-de-x') {
+            $plugin_template = CEL_PLUGIN_DIR . 'templates/diviseurs-de-x.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
             }
         }
 

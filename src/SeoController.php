@@ -101,6 +101,23 @@ class SeoController
     }
 
     /**
+     * Get the current diviseur_id from the query.
+     *
+     * @return string|false
+     */
+    private function getDiviseurId()
+    {
+        global $wp_query;
+        if ($wp_query->get('cel_page') === 'diviseurs-de-x') {
+            $x = $wp_query->get('diviseur_id');
+            if ($x !== '' && is_numeric($x) && intval($x) >= 1 && intval($x) <= 1000000) {
+                return $x;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Filter the page title.
      *
      * @param string $title Original title.
@@ -120,6 +137,10 @@ class SeoController
         $fact_x = $this->getFactorialId();
         if ($fact_x !== false) {
             return "Factorielle de {$fact_x} ({$fact_x}!) | Calcul, Résultat Exact et Formule";
+        }
+        $div_x = $this->getDiviseurId();
+        if ($div_x !== false) {
+            return "Les Diviseurs de {$div_x} | Liste complète, pairs, impairs et premiers";
         }
         $number = $this->getNumberId();
         if ($number !== false) {
@@ -149,6 +170,10 @@ class SeoController
         if ($fact_x !== false) {
             return "Quelle est la factorielle de {$fact_x} ? Obtenez le résultat exact de {$fact_x}!, la décomposition du calcul, le nombre de zéros finaux et les permutations possibles.";
         }
+        $div_x = $this->getDiviseurId();
+        if ($div_x !== false) {
+            return "Quels sont tous les diviseurs de {$div_x} ? Obtenez la liste exacte, découvrez les diviseurs impairs, les nombres premiers, et comment calculer les diviseurs de {$div_x}.";
+        }
         $number = $this->getNumberId();
         if ($number !== false) {
             return ConverterHelper::convert($number, 'desc');
@@ -168,6 +193,10 @@ class SeoController
     {
         $fact_x = $this->getFactorialId();
         if ($fact_x !== false) {
+            return false;
+        }
+        $div_x = $this->getDiviseurId();
+        if ($div_x !== false) {
             return false;
         }
         $number = $this->getNumberId();
@@ -199,6 +228,12 @@ class SeoController
         $fact_x = $this->getFactorialId();
         if ($fact_x !== false) {
             $url = home_url("/factorielle-de-{$fact_x}/");
+            echo '<link rel="canonical" href="' . esc_url($url) . '" />' . "\n";
+            return;
+        }
+        $div_x = $this->getDiviseurId();
+        if ($div_x !== false) {
+            $url = home_url("/diviseurs-de-{$div_x}/");
             echo '<link rel="canonical" href="' . esc_url($url) . '" />' . "\n";
             return;
         }
@@ -287,6 +322,24 @@ class SeoController
             // IF X > 200 AND X % 50 == 0 : index
             // Else : noindex, follow
             if ($x <= 200 || ($x > 200 && $x % 50 === 0)) {
+                return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+            } else {
+                return 'noindex, follow';
+            }
+        }
+        $div_x = $this->getDiviseurId();
+        if ($div_x !== false) {
+            $x = intval($div_x);
+            // Tiered index rules:
+            // x <= 1000         : all index
+            // 1000 < x <= 10000  : index if x % 50 === 0
+            // 10000 < x <= 1000000 : index if x % 500 === 0
+            // else               : noindex, follow
+            if ($x <= 1000) {
+                return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+            } elseif ($x <= 10000 && $x % 50 === 0) {
+                return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+            } elseif ($x <= 1000000 && $x % 500 === 0) {
                 return 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
             } else {
                 return 'noindex, follow';

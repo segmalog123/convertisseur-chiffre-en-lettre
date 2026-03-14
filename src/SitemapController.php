@@ -24,6 +24,7 @@ class SitemapController
         // New custom index filters
         add_filter('wpseo_sitemap_index', [$this, 'addFactorialSitemapIndex']);
         add_filter('wpseo_sitemap_index', [$this, 'addCalculatorsSitemapIndex']);
+        add_filter('wpseo_sitemap_index', [$this, 'addDiviseursSitemapIndex']);
     }
 
     /**
@@ -40,6 +41,7 @@ class SitemapController
             // New sitemaps
             $wpseo_sitemaps->register_sitemap('factorielle', [$this, 'createFactorialSitemap']);
             $wpseo_sitemaps->register_sitemap('calculateurs', [$this, 'createCalculatorsSitemap']);
+            $wpseo_sitemaps->register_sitemap('diviseurs', [$this, 'createDiviseursSitemap']);
         }
     }
 
@@ -54,6 +56,7 @@ class SitemapController
         // Actions for new sitemaps
         add_action('wp_seo_do_sitemap_our-factorielle', [$this, 'createFactorialSitemap']);
         add_action('wp_seo_do_sitemap_our-calculateurs', [$this, 'createCalculatorsSitemap']);
+        add_action('wp_seo_do_sitemap_our-diviseurs', [$this, 'createDiviseursSitemap']);
     }
 
     /**
@@ -211,6 +214,56 @@ class SitemapController
     {
         $items .= '    <sitemap>   
         <loc>' . site_url() . '/calculateurs-sitemap.xml</loc>
+        <lastmod>' . date('c', time()) . '</lastmod>
+    </sitemap>
+';
+        return $items;
+    }
+
+    /**
+     * Create the Diviseurs result pages sitemap.
+     * Index rules (mirrors SeoController::filterRobots and cel_diviseur_is_indexable):
+     *   n <= 1000              : all
+     *   1001 <= n <= 10000     : multiples of 50
+     *   10001 <= n <= 1000000  : multiples of 500
+     */
+    public function createDiviseursSitemap()
+    {
+        global $wpseo_sitemaps;
+        $output = '';
+
+        for ($i = 1; $i <= 1000000; $i++) {
+            $index = false;
+            if ($i <= 1000) {
+                $index = true;
+            } elseif ($i <= 10000 && $i % 50 === 0) {
+                $index = true;
+            } elseif ($i % 500 === 0) {
+                $index = true;
+            }
+            if ($index) {
+                $url = [];
+                $url['loc'] = site_url() . '/diviseurs-de-' . $i . '/';
+                $url['mod'] = date('c', time());
+                $output .= $wpseo_sitemaps->renderer->sitemap_url($url);
+            }
+        }
+
+        $sitemap  = '<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
+        $sitemap .= 'xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" ';
+        $sitemap .= 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $sitemap .= $output . '</urlset>';
+
+        $wpseo_sitemaps->set_sitemap($sitemap);
+    }
+
+    /**
+     * Add the diviseurs sitemap to the sitemap index.
+     */
+    public function addDiviseursSitemapIndex($items)
+    {
+        $items .= '    <sitemap>
+        <loc>' . site_url() . '/diviseurs-sitemap.xml</loc>
         <lastmod>' . date('c', time()) . '</lastmod>
     </sitemap>
 ';

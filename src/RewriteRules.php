@@ -72,6 +72,13 @@ class RewriteRules
             'index.php?cel_page=factorielle-de-x&factorial_id=$matches[1]',
             'top'
         );
+
+        // Dynamic divisors result page: /diviseurs-de-X/
+        add_rewrite_rule(
+            'diviseurs-de-([0-9]+)/?$',
+            'index.php?cel_page=diviseurs-de-x&diviseur_id=$matches[1]',
+            'top'
+        );
     }
 
     /**
@@ -85,6 +92,7 @@ class RewriteRules
         $vars[] = 'number_id';
         $vars[] = 'cel_page'; // used for /convertisseur-anglais/
         $vars[] = 'factorial_id';
+        $vars[] = 'diviseur_id';
         return $vars;
     }
 
